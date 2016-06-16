@@ -109,12 +109,9 @@ class PopItImporter(object):
 
         # Create all areas:
         if 'areas' in data:
-            area_id_to_django_object = {}
             for area_data in data['areas']:
                 with show_data_on_error('area_data', area_data):
-                    popit_id, area = \
-                        self.update_area(area_data)
-                    area_id_to_django_object[popit_id] = area
+                    self.update_area(area_data)
 
         # Do one pass through the organizations:
         org_id_to_django_object = {}
@@ -372,8 +369,7 @@ class PopItImporter(object):
             post_id_to_django_object,
             person_id_to_django_object,
     ):
-        Membership = self.get_popolo_model_class('Membership')
-        if 'id' not in membership_data:
+        def generate_membership_id(membership_data):
             #construct an 'id' based on data that should be unique_together
             new_id = ''
             new_id += membership_data.get('legislative_period_id', 'missing') + "_"
@@ -382,9 +378,13 @@ class PopItImporter(object):
             new_id += membership_data.get('role', 'missing') + "_"
             new_id += membership_data.get('on_behalf_of_id', 'missing') + "_"
             new_id += membership_data.get('person_id', 'missing')
-            #consider hashing the id at this point?
+            return new_id
 
-            membership_data['id'] = new_id
+        Membership = self.get_popolo_model_class('Membership')
+
+        if 'id' not in membership_data:
+            membership_data['id'] = generate_membership_id(membership_data)
+
         existing = self.get_existing_django_object('membership', membership_data['id'])
         if existing is None:
             result = Membership()
