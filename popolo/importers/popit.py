@@ -374,8 +374,17 @@ class PopItImporter(object):
     ):
         Membership = self.get_popolo_model_class('Membership')
         if 'id' not in membership_data:
-            membership_data['id'] = hash(str(membership_data)) # TODO rethink this line!
+            #construct an 'id' based on data that should be unique_together
+            new_id = ''
+            new_id += membership_data.get('legislative_period_id', 'missing') + "_"
+            new_id += membership_data.get('organization_id', 'missing') + "_"
+            new_id += membership_data.get('area_id', 'missing') + "_"
+            new_id += membership_data.get('role', 'missing') + "_"
+            new_id += membership_data.get('on_behalf_of_id', 'missing') + "_"
+            new_id += membership_data.get('person_id', 'missing')
+            #consider hashing the id at this point?
 
+            membership_data['id'] = new_id
         existing = self.get_existing_django_object('membership', membership_data['id'])
         if existing is None:
             result = Membership()
