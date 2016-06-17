@@ -407,8 +407,10 @@ class PopItImporter(object):
         result.end_date = membership_data.get('end_date', '')
         if 'legislative_period_id' in membership_data:
             period_data = self.events[membership_data['legislative_period_id']]
-            result.start_date = period_data.get('start_date', '')
-            result.end_date = period_data.get('end_date', '')
+            if not result.start_date:
+                result.start_date = period_data.get('start_date', '')
+            if not result.end_date:
+                result.end_date = period_data.get('end_date', '')
 
         result.save()
         # Create an identifier with the PopIt ID:
